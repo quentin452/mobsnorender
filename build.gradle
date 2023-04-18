@@ -25,8 +25,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 version = "1.7.10-0.1"
-group= "fr.iamacat.modnotdeletedwarning"
-archivesBaseName = "Modsnotdeletedwarning"
+group= "fr.iamacat.mobsnorender"
+archivesBaseName = "Mobs-no-render"
 
 minecraft {
     version = project.minecraft_version + "-" + project.forge_version
