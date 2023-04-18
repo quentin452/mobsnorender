@@ -1,4 +1,4 @@
-package fr.iamacat.modsnotdeletedwarning.proxy;
+package fr.iamacat.mobsnorender.proxy;
 
 public abstract class CommonProxy
 {

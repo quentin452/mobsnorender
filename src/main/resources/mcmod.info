@@ -1,8 +1,8 @@
 [
 {
-  "modid": "modsnotdeletedwarning",
-  "name": "Mods not deleted warning",
-  "description": "Add a warning for my modpack user.",
+  "modid": "mobsnorender",
+  "name": "Mobs no render",
+  "description": "skip entity render of mobs if they are higher or lower in Y changeable in config.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
