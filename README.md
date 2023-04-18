@@ -1,6 +1,6 @@
 # mobsnorender
 
-skip entity render of entities if they are higher or lower value in X Y Z
+skip entity render of entities if they are higher or lower value in X Y Z in function of the player coords
 
 # motivation
 
