@@ -32,4 +32,4 @@ add to curseforge and maybe modrinth
 
 Add me on discord : I'm A Cat[FR]#7202
 
-Discord server : https://discord.gg/ZnmHKJzKkZ
+Discord server : https://discord.gg/ZnmHKJzKkZ 
