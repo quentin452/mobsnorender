@@ -27,3 +27,9 @@ add to curseforge and maybe modrinth
 [*Github*](https://github.com/quentin452/mobsnorender)
 
 [*Curseforge*](https://legacy.curseforge.com/minecraft/mc-mods/mobs-no-render)
+
+# 
+
+Add me on discord : I'm A Cat[FR]#7202
+
+Discord server : https://discord.gg/ZnmHKJzKkZ
