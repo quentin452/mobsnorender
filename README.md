@@ -6,13 +6,13 @@ skip entity render of entities if they are higher or lower value in X Y Z
 
 Have more performance in my 1.7.10 modpacks
 
-# planned features
+# todo
 
-dynamically change Y coord if alot of mobs are affiched
+dynamically change Y coord if alot of mobs are rendered
 
 add entity blacklist
 
-add tile entity skipper
+add tile entity hider
 
 add ingame config
 
