@@ -6,5 +6,4 @@ planned features
 
 coords changeable via config
 dynamically change Y coord if alot of mobs are affiched
-maybe skip entity render in function of X and Z coord
 add entity blacklist

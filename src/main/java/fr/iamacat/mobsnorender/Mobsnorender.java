@@ -50,10 +50,16 @@ public class Mobsnorender {
         if (event.entity instanceof EntityLivingBase) {
             EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
 
-            // Vérifiez si l'entité est à (un certains nombre)de blocs en termes de couche Y
-            if (Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY) > 32) {
+            // Calculez la distance XZ entre l'entité et le joueur
+            double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
+            double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
+            double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
+
+            // Vérifiez si la distance XZ est supérieure à une certaine valeur
+            if (distanceX > 50 || distanceY > 32 || distanceZ > 50) {
                 // Désactivez le rendu de l'entité
                 event.setCanceled(true);
+
             }
         }
     }
