@@ -18,12 +18,16 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
-
 import java.util.List;
+import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION, dependencies = "before:mcinstanceloader")
 public class Mobsnorender {
 
+    // Définir les valeurs par défaut pour la distance X, Y et Z
+    private int distanceX = 48;
+    private int distanceY = 32;
+    private int distanceZ = 48;
     @Mod.Instance(Reference.MOD_ID)
     public static Mobsnorender instance;
 
@@ -32,6 +36,17 @@ public class Mobsnorender {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        // Charger les valeurs de configuration à partir du fichier de configuration
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+        config.load();
+
+        // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
+        distanceX = config.getInt("distanceX", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
+        distanceY = config.getInt("distanceY", "general", 32, 1, 1000, "The maximum Y distance to render entities");
+        distanceZ = config.getInt("distanceZ", "general", 48, 1, 1000, "The maximum Z distance to render entities(X and Z must be equalized)");
+
+        // Enregistrer les valeurs de configuration
+        config.save();
     }
 
     @Mod.EventHandler
@@ -50,16 +65,15 @@ public class Mobsnorender {
         if (event.entity instanceof EntityLivingBase) {
             EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
 
-            // Calculez la distance XZ entre l'entité et le joueur
+            // Calculez la distance X, Y et Z entre l'entité et le joueur
             double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
             double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
             double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
 
-            // Vérifiez si la distance XZ est supérieure à une certaine valeur
-            if (distanceX > 50 || distanceY > 32 || distanceZ > 50) {
+            // Vérifiez si la distance X, Y et Z est supérieure aux valeurs configurées
+            if (distanceX > this.distanceX || distanceY > this.distanceY || distanceZ > this.distanceZ) {
                 // Désactivez le rendu de l'entité
                 event.setCanceled(true);
-
             }
         }
     }
