@@ -8,13 +8,18 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
-import fr.iamacat.mobsnorender.rendering.MobRenderingUtils;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.List;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION, dependencies = "before:mcinstanceloader")
 public class Mobsnorender {
@@ -32,7 +37,6 @@ public class Mobsnorender {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new MobRenderingUtils());
     }
 
 
@@ -46,13 +50,12 @@ public class Mobsnorender {
         if (event.entity instanceof EntityLivingBase) {
             EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
 
-            // Vérifiez si l'entité est à plus de 8 blocs en termes de couche Y
+            // Vérifiez si l'entité est à (un certains nombre)de blocs en termes de couche Y
             if (Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY) > 32) {
                 // Désactivez le rendu de l'entité
                 event.setCanceled(true);
             }
         }
     }
-
 }
 
