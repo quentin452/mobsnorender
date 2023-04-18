@@ -28,7 +28,7 @@ add to curseforge and maybe modrinth
 
 [*Curseforge*](https://legacy.curseforge.com/minecraft/mc-mods/mobs-no-render)
 
-# 
+# Discord
 
 Add me on discord : I'm A Cat[FR]#7202
 
