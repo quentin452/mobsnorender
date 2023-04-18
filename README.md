@@ -19,3 +19,11 @@ add ingame config
 add a way to auto delete old config if the mod get updated
 
 add to curseforge and maybe modrinth
+
+# Links to descriptions of my projects.
+
+[*Modrinth*](https://modrinth.com/mod/mobs-no-render)
+
+[*Github*](https://github.com/quentin452/mobsnorender)
+
+[*Curseforge*](https://legacy.curseforge.com/minecraft/mc-mods/mobs-no-render)
