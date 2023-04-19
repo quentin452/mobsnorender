@@ -10,8 +10,6 @@ Have more performance in my 1.7.10 modpacks
 
 dynamically change X Y Z coord if alot of mobs are rendered
 
-add entity blacklist
-
 add tile entity canceller
 
 add ingame config

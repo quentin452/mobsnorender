@@ -18,11 +18,16 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION, dependencies = "before:mcinstanceloader")
 public class Mobsnorender {
+
+    private final List<String> blacklist = new ArrayList<String>();
 
     // Définir les valeurs par défaut pour la distance X, Y et Z
     private int distanceX = 48;
@@ -30,6 +35,7 @@ public class Mobsnorender {
     private int distanceZ = 48;
     @Mod.Instance(Reference.MOD_ID)
     public static Mobsnorender instance;
+
 
     @SidedProxy(clientSide = Reference.CLIENT_PROXY, serverSide = Reference.SERVER_PROXY)
     public static CommonProxy proxy;
@@ -39,6 +45,14 @@ public class Mobsnorender {
         // Charger les valeurs de configuration à partir du fichier de configuration
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
+        // Récupérer les noms d'entités à exclure de la configuration
+        String[] blacklistArray = config.getStringList("blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
+
+
+        // Ajouter les noms d'entités à la liste noire
+        for (String entityName : blacklistArray) {
+            blacklist.add(entityName.toLowerCase());
+        }
 
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
         distanceX = config.getInt("distanceX", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
@@ -61,21 +75,23 @@ public class Mobsnorender {
 
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
-        // Vérifiez si l'entité est une entité vivante
-        if (event.entity instanceof EntityLivingBase) {
+        // Check if the entity is not null and is a living entity
+        if (event.entity != null && event.entity instanceof EntityLivingBase) {
             EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
+            // Check if the entity should be excluded
+            if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
+                return;
+            }
 
-            // Calculez la distance X, Y et Z entre l'entité et le joueur
+            // Calculate the X, Y, and Z distance between the entity and the player
             double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
             double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
             double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
 
-            // Vérifiez si la distance X, Y et Z est supérieure aux valeurs configurées
-            if (distanceX > this.distanceX || distanceY > this.distanceY || distanceZ > this.distanceZ) {
-                // Désactivez le rendu de l'entité
+            // Check if the X, Y, and Z distances are greater than the configured values
+            if (distanceX > this.distanceX || distanceY > this.distanceY || distanceZ > this.distanceZ) {// Disable rendering of the entity
                 event.setCanceled(true);
             }
         }
     }
 }
-
