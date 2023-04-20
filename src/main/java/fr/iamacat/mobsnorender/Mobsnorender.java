@@ -8,6 +8,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import fr.iamacat.mobsnorender.ingameconfig.InGameConfig;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.io.File;
 import java.util.logging.LogManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,6 +108,7 @@ public class Mobsnorender {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
     }
+
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {

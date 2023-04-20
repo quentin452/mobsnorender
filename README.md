@@ -12,8 +12,6 @@ dynamically change X Y Z coord if alot of mobs are rendered
 
 add a config to disabling entitydistance et tile entity distance
 
-add ingame config
-
 add config to disabling all entity from rendering ambient/agressive entity/passive entity
 
 add a blackist to the entity rendering removal
