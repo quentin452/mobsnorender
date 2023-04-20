@@ -62,10 +62,10 @@ public class Mobsnorender {
         config.load();
 
         // Get entity names to exclude from configuration
-        String[] blacklistArray = config.getStringList("blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
+        String[] blacklistArray = config.getStringList("00_blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
 
         // Add tile entity names to blacklist
-        String[] tileEntityBlacklistArray = config.getStringList("tileEntityBlacklist", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller");
+        String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller");
         for (String tileEntityName : tileEntityBlacklistArray) {
             tileEntityBlacklist.add(tileEntityName.toLowerCase());
         }
@@ -75,16 +75,17 @@ public class Mobsnorender {
             blacklist.add(entityName.toLowerCase());
         }
 
+
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
-        distanceXEntity = config.getInt("distanceXEntity", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
-        distanceYEntity = config.getInt("distanceYEntity", "general", 32, 1, 1000, "The maximum Y distance to render entities");
-        distanceZEntity = config.getInt("distanceZEntity", "general", 48, 1, 1000, "The maximum Z distance to render entities(X and Z must be equalized)");
+        distanceXEntity = config.getInt("01_distanceXEntity", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
+        distanceYEntity = config.getInt("02_distanceYEntity", "general", 32, 1, 1000, "The maximum Y distance to render entities");
+        distanceZEntity = config.getInt("03_distanceZEntity", "general", 48, 1, 1000, "The maximum Z distance to render entities(X and Z must be equalized)");
 
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
 
-        distanceXTileEntity = config.getInt("distanceXTileEntity", "general", 64, 1, 1000, "The maximum X distance to render tile entities(X and Z must be equalized)");
-        distanceYTileEntity = config.getInt("distanceYTileEntity", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
-        distanceZTileEntity = config.getInt("distanceZTileEntity", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
+        distanceXTileEntity = config.getInt("05_distanceXTileEntity", "general", 64, 1, 1000, "The maximum X distance to render tile entities(X and Z must be equalized)");
+        distanceYTileEntity = config.getInt("06_distanceYTileEntity", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
+        distanceZTileEntity = config.getInt("07_distanceZTileEntity", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
 
         // Enregistrer les valeurs de configuration
         config.save();
