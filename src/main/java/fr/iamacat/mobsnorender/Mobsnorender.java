@@ -67,8 +67,7 @@ public class Mobsnorender {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
     }
-
-
+    
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
     }
