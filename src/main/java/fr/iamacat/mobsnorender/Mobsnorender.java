@@ -8,7 +8,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import fr.iamacat.mobsnorender.ingameconfig.InGameConfig;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
