@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION, dependencies = "before:mcinstanceloader")
+@Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
     private final List<String> blacklist = new ArrayList<String>();
