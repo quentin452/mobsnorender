@@ -23,6 +23,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.logging.LogManager;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.lang.reflect.Field;
@@ -71,7 +74,6 @@ public class Mobsnorender {
         for (String entityName : blacklistArray) {
             blacklist.add(entityName.toLowerCase());
         }
-
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
         distanceXEntity = config.getInt("distanceXEntity", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
         distanceYEntity = config.getInt("distanceYEntity", "general", 32, 1, 1000, "The maximum Y distance to render entities");
@@ -97,24 +99,27 @@ public class Mobsnorender {
 
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
-        // Check if the entity is not null and is a living entity
-        if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
-            if (event.entity instanceof EntityLivingBase) {
-                EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
-                if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
-                    event.setCanceled(true);
-                    return;
-                }
-                // Calculate the X, Y, and Z distance between the entity and the player
-                double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
-                double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
-                double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
-                if (distanceX > this.distanceXEntity || distanceY > this.distanceYEntity || distanceZ > this.distanceZEntity) {
-                    event.setCanceled(true);
+            // Check if the entity is not null and is a living entity
+            if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
+                if (event.entity instanceof EntityLivingBase) {
+                    EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
+                    if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
+                        event.setCanceled(true);
+                        return;
+                    }
+                    // Calculate the X, Y, and Z distance between the entity and the player
+                    double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
+                    double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
+                    double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
+                    if (distanceX > this.distanceXEntity || distanceY > this.distanceYEntity || distanceZ > this.distanceZEntity) {
+                        event.setCanceled(true);
+                    }
                 }
             }
         }
-}
+    }
+
+
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -138,6 +143,7 @@ public class Mobsnorender {
         for (TileEntity tileEntity : tileEntities) {
             // Check if the tile entity is associated with a special renderer
             TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+
             if (renderer != null) {
                 // Check if the tile entity should be rendered
                 Vec3 playerPos = Vec3.createVectorHelper(x, y, z);
@@ -152,6 +158,6 @@ public class Mobsnorender {
 
                 }
             }
-            }
         }
+    }
     }
