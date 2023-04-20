@@ -16,6 +16,8 @@ add ingame config
 
 add a way to auto delete old config if the mod get updated
 
+add config to disabling all entity from rendering ambient/agressive entity/passive entity
+
 # Links to descriptions of my projects.
 
 [*Modrinth*](https://modrinth.com/mod/mobs-no-render)
