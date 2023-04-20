@@ -10,14 +10,9 @@ Have more performance in my 1.7.10 modpacks
 
 dynamically change X Y Z coord if alot of mobs are rendered
 
-add tile entity canceller
-
-add an better config file
 add a config to disabling entitydistance et tile entity distance
 
 add ingame config
-
-add a way to auto delete old config if the mod get updated
 
 add config to disabling all entity from rendering ambient/agressive entity/passive entity
 
