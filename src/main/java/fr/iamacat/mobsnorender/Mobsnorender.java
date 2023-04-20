@@ -35,13 +35,12 @@ import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
-    private static final Logger LOGGER = Logger.getLogger(Mobsnorender.class.getName());
-
+    
     private final List<String> blacklist = new ArrayList<String>();
 
     private final List<String> tileEntityBlacklist = new ArrayList<String>();
 
-    // Définir les valeurs par défaut pour la distance X, Y et Z
+    // Define default values for X, Y, and Z distances
     private int distanceXEntity = 48;
     private int distanceYEntity = 32;
     private int distanceZEntity = 48;
@@ -58,34 +57,38 @@ public class Mobsnorender {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        // Charger les valeurs de configuration à partir du fichier de configuration
+        // Load configuration values from configuration file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
-        // Récupérer les noms d'entités à exclure de la configuration
+
+        // Get entity names to exclude from configuration
         String[] blacklistArray = config.getStringList("blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
 
-        // Ajouter les noms des tile entités à la liste noire
+        // Add tile entity names to blacklist
         String[] tileEntityBlacklistArray = config.getStringList("tileEntityBlacklist", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller");
         for (String tileEntityName : tileEntityBlacklistArray) {
             tileEntityBlacklist.add(tileEntityName.toLowerCase());
         }
 
-        // Ajouter les noms d'entités à la liste noire
+        // Add entity names to blacklist
         for (String entityName : blacklistArray) {
             blacklist.add(entityName.toLowerCase());
         }
+
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
         distanceXEntity = config.getInt("distanceXEntity", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
         distanceYEntity = config.getInt("distanceYEntity", "general", 32, 1, 1000, "The maximum Y distance to render entities");
         distanceZEntity = config.getInt("distanceZEntity", "general", 48, 1, 1000, "The maximum Z distance to render entities(X and Z must be equalized)");
 
         // Récupérer les valeurs de distance X, Y et Z du fichier de configuration et les utiliser pour mettre à jour les valeurs par défaut
+
         distanceXTileEntity = config.getInt("distanceXTileEntity", "general", 64, 1, 1000, "The maximum X distance to render tile entities(X and Z must be equalized)");
         distanceYTileEntity = config.getInt("distanceYTileEntity", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
         distanceZTileEntity = config.getInt("distanceZTileEntity", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
 
         // Enregistrer les valeurs de configuration
         config.save();
+
     }
 
     @Mod.EventHandler
