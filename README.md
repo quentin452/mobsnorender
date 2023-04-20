@@ -23,6 +23,8 @@ add config to disabling all entity from rendering ambient/agressive entity/passi
 
 add a blackist to the entity rendering removal
 
+fix tile entity renderer doesn't work
+
 # Links to descriptions of my projects.
 
 [*Modrinth*](https://modrinth.com/mod/mobs-no-render)
