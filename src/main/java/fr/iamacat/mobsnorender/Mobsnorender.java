@@ -12,6 +12,7 @@ import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
@@ -123,15 +124,14 @@ public class Mobsnorender {
 
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
-            // Check if the entity is not null and is a living entity
-            if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
-                if (event.entity instanceof EntityLivingBase) {
-                    EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
-                    if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
-                        event.setCanceled(true);
-                        return;
-                    }
-                    // Calculate the X, Y, and Z distance between the entity and the player
+        // Check if the entity is not null and is a living entity
+        if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
+            if (event.entity instanceof EntityLivingBase) {
+                EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
+                if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
+                    // Entity is in blacklist, do not cancel rendering
+                } else {
+                    // Entity is not in blacklist, check distance and cancel rendering if necessary
                     double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
                     double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
                     double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
@@ -141,8 +141,9 @@ public class Mobsnorender {
                 }
             }
         }
-
-    @SubscribeEvent
+    }
+/*
+   @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         World world = mc.theWorld;
@@ -154,19 +155,29 @@ public class Mobsnorender {
             if (obj instanceof TileEntity) {
                 TileEntity tileEntity = (TileEntity) obj;
                 if (tileEntity != null) {
-                    // Check if the TileEntity should be rendered based on its distance from the player
-                    double distanceX = Math.abs(tileEntity.xCoord - x);
-                    double distanceY = Math.abs(tileEntity.yCoord - y);
-                    double distanceZ = Math.abs(tileEntity.zCoord - z);
-                    if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
-                        continue;
-                    }
                     // Check if the TileEntity is not blacklisted
-                    if (!tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
+                    if (tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
                         TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                    }
+                        if (renderer != null) {
+                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - RenderManager.renderPosX, tileEntity.yCoord - RenderManager.renderPosY, tileEntity.zCoord- RenderManager.renderPosZ, 0.0f);
+                        }
+                    } else {
+                        // Check if the TileEntity should be rendered based on its distance from the player
+                        double distanceX = Math.abs(tileEntity.xCoord - x);
+                        double distanceY = Math.abs(tileEntity.yCoord - y);
+                        double distanceZ = Math.abs(tileEntity.zCoord - z);
+                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                            // If the TileEntity is too far away, skip rendering it
+                            continue;
+                        }
+                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                        if (renderer != null) {
+                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - RenderManager.renderPosX, tileEntity.yCoord - RenderManager.renderPosY, tileEntity.zCoord - RenderManager.renderPosZ, 0.0f);
+                        }
                     }
                 }
             }
         }
-    }
+   }
+ */
+}

@@ -14,6 +14,10 @@ add a config to disabling entitydistance et tile entity distance
 
 add config to disabling all entity from rendering ambient/agressive entity/passive entity
 
+add a config to completly disabling chest tile entitées animation
+
+add a config to disabling all entity rendering + tileentity rendering , and removing the shadow of entity
+
 fix tile entity renderer canceller doesn't work
 
 # Links to descriptions of my projects.
