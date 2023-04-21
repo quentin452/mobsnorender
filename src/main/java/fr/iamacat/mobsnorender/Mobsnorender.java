@@ -174,6 +174,7 @@ public class Mobsnorender {
                         }
                         TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
                         if (renderer != null) {
+                            renderer.func_147496_a(tileEntity.getWorldObj());
                             renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                         }
                     }
