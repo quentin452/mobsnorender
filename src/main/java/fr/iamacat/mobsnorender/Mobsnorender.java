@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -141,39 +142,38 @@ public class Mobsnorender {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        // Iterate over all Tile Entities in the world
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        double playerX = player.posX;
+        double playerY = player.posY;
+        double playerZ = player.posZ;
+
         for (Object obj : Minecraft.getMinecraft().theWorld.loadedTileEntityList) {
             if (obj instanceof TileEntity) {
                 TileEntity tileEntity = (TileEntity) obj;
-                // Check if the Tile Entity is in the blacklist
-                if (tileEntityBlacklist.contains(tileEntity.getClass())) {
-                    // Tile Entity is in blacklist, skip renderer
-                    continue;
-                }
-                // Check if the Tile Entity has a special renderer
-                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                    // Check distance from player to Tile Entity
-                    double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
-                    double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
-                    double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
-                    if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
-                        // Distance is too great, remove Tile Entity special renderer if it exists
+
+                if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
+                    if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                        double distanceX = tileEntity.xCoord - playerX;
+                        double distanceY = tileEntity.yCoord - playerY;
+                        double distanceZ = tileEntity.zCoord - playerZ;
+                        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ);
+
                         if (renderersSpecial.containsKey(tileEntity)) {
                             TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
                             if (renderer != null) {
                                 renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                             }
                         }
+
                     } else {
-                        // Always render Tile Entity with special renderer
                         if (!renderersSpecial.containsKey(tileEntity)) {
                             TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
                             renderersSpecial.put(tileEntity, renderer);
                             renderer.func_147496_a(tileEntity.getWorldObj());
                         }
+
                         TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
                         if (renderer != null) {
-                            renderer.func_147496_a(tileEntity.getWorldObj());
                             renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                         }
                     }
