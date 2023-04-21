@@ -152,24 +152,27 @@ public class Mobsnorender {
                 // Check if the Tile Entity has a special renderer
                 if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
                     // Check distance from player to Tile Entity
-                    double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
-                    double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
-                    double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
                     boolean shouldRender = true;
-                    if (Math.abs(distanceX) > this.distanceXTileEntity || Math.abs(distanceY) > this.distanceYTileEntity || Math.abs(distanceZ) > this.distanceZTileEntity) {
-                        // Distance is too great, remove Tile Entity special renderer if it exists
-                        if (renderersSpecial.containsKey(tileEntity)) {
-                            TileEntitySpecialRenderer renderer = renderersSpecial.remove(tileEntity);
-                            renderer.func_147496_a(tileEntity.getWorldObj());
-                            renderer = null;
-                        }
-                        shouldRender = false;
-                    }
-                    if (shouldRender) {
-                        // Tile Entity has a special renderer and is within range, add to special renderer list if not already there
-                        if (!renderersSpecial.containsKey(tileEntity)) {
-                            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                            renderersSpecial.put(tileEntity, renderer);
+                    // Check if the Tile Entity has a special renderer
+                    if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                        // Check distance from player to Tile Entity
+                        double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
+                        double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
+                        double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
+                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                            // Distance is too great, remove Tile Entity special renderer if it exists
+                            if (renderersSpecial.containsKey(tileEntity)) {
+                                TileEntitySpecialRenderer renderer = renderersSpecial.remove(tileEntity);
+                                renderer.func_147496_a(tileEntity.getWorldObj());
+                                // Set renderer object to null after removing it from the map
+                                renderer = null;
+                            }
+                            shouldRender = false;
+                        } else {
+                            // Tile Entity has a special renderer and is within range, add to special renderer list if not already there
+                            if (!renderersSpecial.containsKey(tileEntity)) {
+                                TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                                renderersSpecial.put(tileEntity, renderer);
                             renderer.func_147496_a(tileEntity.getWorldObj());
                         }
                         // Render Tile Entity using special renderer
@@ -178,5 +181,6 @@ public class Mobsnorender {
                 }
             }
         }
+    }
     }
 }
