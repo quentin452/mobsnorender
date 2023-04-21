@@ -19,6 +19,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -139,32 +141,30 @@ public class Mobsnorender {
             }
         }
     }
-    private ConcurrentHashMap<TileEntity, TileEntitySpecialRenderer> renderersSpecial = new ConcurrentHashMap<>();
+
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
+
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         double playerX = player.posX;
         double playerY = player.posY;
         double playerZ = player.posZ;
+        World world = player.worldObj;
 
-        for (Object obj : Minecraft.getMinecraft().theWorld.loadedTileEntityList) {
-            if (obj instanceof TileEntity) {
-                TileEntity tileEntity = (TileEntity) obj;
-                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                    if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
-                        double distanceX = tileEntity.xCoord - playerX;
-                        double distanceY = tileEntity.yCoord - playerY;
-                        double distanceZ = tileEntity.zCoord - playerZ;
-                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                        renderersSpecial.put(tileEntity, renderer);
-                        renderer.func_147496_a(tileEntity.getWorldObj());
+        AxisAlignedBB boundingBox = AxisAlignedBB.getBoundingBox(playerX - distanceXTileEntity, playerY - distanceYTileEntity, playerZ - distanceZTileEntity, playerX + distanceXTileEntity, playerY + distanceYTileEntity, playerZ + distanceZTileEntity);
+        List<TileEntity> nearbyTileEntities = world.getEntitiesWithinAABB(TileEntity.class, boundingBox);
 
-                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity || Math.abs(distanceX) > this.distanceXTileEntity || Math.abs(distanceY) > this.distanceYTileEntity || Math.abs(distanceZ) > this.distanceZTileEntity) {
-                            renderer.renderTileEntityAt(tileEntity, (float)playerX, (float)playerY, (float)playerZ, event.partialTicks);
-                        }
-                    }
+        for (TileEntity tileEntity : nearbyTileEntities) {
+            // Check if the Tile Entity has a special renderer
+            if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                // Check if the Tile Entity is not in the blacklist
+                if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
+                    TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                    renderer.func_147496_a(tileEntity.getWorldObj());
+                    renderer.renderTileEntityAt(tileEntity, (float)playerX, (float)playerY, (float)playerZ, event.partialTicks);
                 }
             }
         }
     }
+
 }
