@@ -161,16 +161,12 @@ public class Mobsnorender {
                     if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
                         continue;
                     }
-
                     // Check if the TileEntity is not blacklisted
                     if (!tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
                         TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                        if (renderer != null) {
-                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - x, tileEntity.yCoord - y, tileEntity.zCoord - z, event.partialTicks);
-                        }
+                    }
                     }
                 }
             }
         }
     }
-}
