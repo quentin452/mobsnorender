@@ -1,47 +1,38 @@
 package fr.iamacat.mobsnorender;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
+import fr.iamacat.mobsnorender.tilentity.CustomTileEntityChestRenderer;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import java.util.Map;
+import java.util.HashMap;
 
-import java.io.File;
-import java.util.logging.LogManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.lang.reflect.Field;
 import java.util.*;
 
 import net.minecraftforge.common.config.Configuration;
+import org.lwjgl.opengl.GL11;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
-    private static final String VERSION = "0.4"; // Change this to the desired version
-    private final List<String> entityblacklist = new ArrayList<String>();
 
+    private static final String VERSION = "0.5"; // Change this to the desired version
+    private final List<String> entityblacklist = new ArrayList<String>();
     private final List<String> tileEntityBlacklist = new ArrayList<String>();
 
     // Define default values for X, Y, and Z distances
@@ -117,6 +108,8 @@ public class Mobsnorender {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
+        // Register the CustomTileEntityChestRenderer class with Minecraft
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChest.class, new CustomTileEntityChestRenderer());
     }
 
 
@@ -144,30 +137,43 @@ public class Mobsnorender {
             }
         }
     }
-
+    private Map<TileEntity, TileEntitySpecialRenderer> renderersSpecial = new HashMap<>();
     @SubscribeEvent
-    public void onWorldRenderLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        RenderGlobal renderGlobal = mc.renderGlobal;
-        World world = mc.theWorld;
-
-        for (Object obj : world.loadedTileEntityList) {
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        // Iterate over all Tile Entities in the world
+        for (Object obj : Minecraft.getMinecraft().theWorld.loadedTileEntityList) {
             if (obj instanceof TileEntity) {
                 TileEntity tileEntity = (TileEntity) obj;
-                if (tileEntity != null) {
-                    // Check if the TileEntity is in the blacklist
-                    if (tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
-                        // Tile Entity is in blacklist, do not cancel rendering
-                    } else {
-                        // Check if the TileEntity should be rendered based on its distance from the player
-                        double distanceX = Math.abs(tileEntity.xCoord - mc.thePlayer.posX);
-                        double distanceY = Math.abs(tileEntity.yCoord - mc.thePlayer.posY);
-                        double distanceZ = Math.abs(tileEntity.zCoord - mc.thePlayer.posZ);
-                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
-                            // If the TileEntity is too far away, cancel rendering it
-                            tileEntity.markDirty(); // Force a full update of the Tile Entity
-                            renderGlobal.markBlockForRenderUpdate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+                // Check if the Tile Entity is in the blacklist
+                if (tileEntityBlacklist.contains(tileEntity.getClass())) {
+                    // Tile Entity is in blacklist, skip renderer
+                    continue;
+                }
+                // Check if the Tile Entity has a special renderer
+                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                    // Check distance from player to Tile Entity
+                    double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
+                    double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
+                    double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
+                    boolean shouldRender = true;
+                    if (Math.abs(distanceX) > this.distanceXTileEntity || Math.abs(distanceY) > this.distanceYTileEntity || Math.abs(distanceZ) > this.distanceZTileEntity) {
+                        // Distance is too great, remove Tile Entity special renderer if it exists
+                        if (renderersSpecial.containsKey(tileEntity)) {
+                            TileEntitySpecialRenderer renderer = renderersSpecial.remove(tileEntity);
+                            renderer.func_147496_a(tileEntity.getWorldObj());
+                            renderer = null;
                         }
+                        shouldRender = false;
+                    }
+                    if (shouldRender) {
+                        // Tile Entity has a special renderer and is within range, add to special renderer list if not already there
+                        if (!renderersSpecial.containsKey(tileEntity)) {
+                            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                            renderersSpecial.put(tileEntity, renderer);
+                            renderer.func_147496_a(tileEntity.getWorldObj());
+                        }
+                        // Render Tile Entity using special renderer
+                        renderersSpecial.get(tileEntity).renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                     }
                 }
             }
