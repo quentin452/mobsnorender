@@ -142,8 +142,6 @@ public class Mobsnorender {
             }
         }
 
-    TileEntityRendererDispatcher tileEntityRenderer = TileEntityRendererDispatcher.instance;
-
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -152,38 +150,27 @@ public class Mobsnorender {
         double y = mc.thePlayer.posY;
         double z = mc.thePlayer.posZ;
 
-        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(
-                x - distanceXTileEntity,
-                y - distanceYTileEntity,
-                z - distanceZTileEntity,
-                x + distanceXTileEntity + 1,
-                y + distanceYTileEntity + 1,
-                z + distanceZTileEntity + 1
-        );
+        for (Object obj : world.loadedTileEntityList) {
+            if (obj instanceof TileEntity) {
+                TileEntity tileEntity = (TileEntity) obj;
+                if (tileEntity != null) {
+                    // Check if the TileEntity should be rendered based on its distance from the player
+                    double distanceX = Math.abs(tileEntity.xCoord - x);
+                    double distanceY = Math.abs(tileEntity.yCoord - y);
+                    double distanceZ = Math.abs(tileEntity.zCoord - z);
+                    if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                        continue;
+                    }
 
-        // Get all tile entities within the bounding box
-        List<TileEntity> tileEntities = world.getEntitiesWithinAABB(TileEntity.class, bb);
-
-        Map<Class<? extends TileEntity>, TileEntitySpecialRenderer> specialRenderers = new HashMap<>(tileEntityRenderer.mapSpecialRenderers);
-        for (TileEntity tileEntity : tileEntities) {
-            if (tileEntity != null) {
-                if (tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
-                    specialRenderers.remove(tileEntity.getClass());
-                } else {
-                    TileEntitySpecialRenderer renderer = tileEntityRenderer.getSpecialRenderer(tileEntity);
-                    if (renderer != null) {
-                        Vec3 playerPos = Vec3.createVectorHelper(x, y, z);
-                        Vec3 tilePos = Vec3.createVectorHelper(tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 0.5);
-                        double distance = playerPos.distanceTo(tilePos);
-                        if (distance <= this.distanceXTileEntity && Math.abs(y - tileEntity.yCoord) <= this.distanceYTileEntity && distance <= this.distanceZTileEntity) {
+                    // Check if the TileEntity is not blacklisted
+                    if (!tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
+                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                        if (renderer != null) {
                             renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - x, tileEntity.yCoord - y, tileEntity.zCoord - z, event.partialTicks);
-                        } else {
-                            specialRenderers.remove(tileEntity.getClass());
                         }
                     }
                 }
             }
         }
-        tileEntityRenderer.mapSpecialRenderers = specialRenderers;
     }
 }
