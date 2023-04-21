@@ -52,6 +52,13 @@ public class Mobsnorender {
     public static CommonProxy proxy;
 
     @Mod.EventHandler
+    public void init(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
+        // Register the CustomTileEntityChestRenderer class with Minecraft
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChest.class, new CustomTileEntityChestRenderer());
+    }
+
+    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         // Load configuration values from configuration file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
@@ -105,14 +112,6 @@ public class Mobsnorender {
             config.save();
         }
     }
-
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(this);
-        // Register the CustomTileEntityChestRenderer class with Minecraft
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChest.class, new CustomTileEntityChestRenderer());
-    }
-
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
