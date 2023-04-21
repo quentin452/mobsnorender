@@ -159,7 +159,7 @@ public class Mobsnorender {
                         renderersSpecial.put(tileEntity, renderer);
                         renderer.func_147496_a(tileEntity.getWorldObj());
 
-                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity || Math.abs(distanceX) > this.distanceXTileEntity || Math.abs(distanceY) > this.distanceYTileEntity || Math.abs(distanceZ) > this.distanceZTileEntity) {
                             renderer.renderTileEntityAt(tileEntity, (float)playerX, (float)playerY, (float)playerZ, event.partialTicks);
                         }
                     }
