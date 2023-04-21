@@ -23,6 +23,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class Mobsnorender {
 
     private static final String VERSION = "0.5"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<String>();
-    private final List<String> tileEntityBlacklist = new ArrayList<String>();
+    private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
     private int distanceXEntity = 48;
@@ -138,8 +139,7 @@ public class Mobsnorender {
             }
         }
     }
-    private Map<TileEntity, TileEntitySpecialRenderer> renderersSpecial = new HashMap<>();
-
+    private ConcurrentHashMap<TileEntity, TileEntitySpecialRenderer> renderersSpecial = new ConcurrentHashMap<>();
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
@@ -150,31 +150,17 @@ public class Mobsnorender {
         for (Object obj : Minecraft.getMinecraft().theWorld.loadedTileEntityList) {
             if (obj instanceof TileEntity) {
                 TileEntity tileEntity = (TileEntity) obj;
-
-                if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
-                    if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                    if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
                         double distanceX = tileEntity.xCoord - playerX;
                         double distanceY = tileEntity.yCoord - playerY;
                         double distanceZ = tileEntity.zCoord - playerZ;
-                        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ);
+                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                        renderersSpecial.put(tileEntity, renderer);
+                        renderer.func_147496_a(tileEntity.getWorldObj());
 
-                        if (renderersSpecial.containsKey(tileEntity)) {
-                            TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
-                            if (renderer != null) {
-                                renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
-                            }
-                        }
-
-                    } else {
-                        if (!renderersSpecial.containsKey(tileEntity)) {
-                            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                            renderersSpecial.put(tileEntity, renderer);
-                            renderer.func_147496_a(tileEntity.getWorldObj());
-                        }
-
-                        TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
-                        if (renderer != null) {
-                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
+                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                            renderer.renderTileEntityAt(tileEntity, (float)playerX, (float)playerY, (float)playerZ, event.partialTicks);
                         }
                     }
                 }
