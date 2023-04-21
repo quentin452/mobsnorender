@@ -11,6 +11,8 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -37,8 +39,8 @@ import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
-    private static final String VERSION = "0.3"; // Change this to the desired version
-    private final List<String> blacklist = new ArrayList<String>();
+    private static final String VERSION = "0.4"; // Change this to the desired version
+    private final List<String> entityblacklist = new ArrayList<String>();
 
     private final List<String> tileEntityBlacklist = new ArrayList<String>();
 
@@ -81,17 +83,17 @@ public class Mobsnorender {
         config.load();
 
         // Get entity names to exclude from configuration
-        String[] blacklistArray = config.getStringList("00_blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
+        String[] blacklistArray = config.getStringList("00_entityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton>");
 
         // Add tile entity names to blacklist
-        String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller");
+        String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
         for (String tileEntityName : tileEntityBlacklistArray) {
             tileEntityBlacklist.add(tileEntityName.toLowerCase());
         }
 
         // Add entity names to blacklist
         for (String entityName : blacklistArray) {
-            blacklist.add(entityName.toLowerCase());
+            entityblacklist.add(entityName.toLowerCase());
         }
 
 
@@ -128,7 +130,7 @@ public class Mobsnorender {
         if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
             if (event.entity instanceof EntityLivingBase) {
                 EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
-                if (blacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
+                if (entityblacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
                     // Entity is in blacklist, do not cancel rendering
                 } else {
                     // Entity is not in blacklist, check distance and cancel rendering if necessary
@@ -142,42 +144,33 @@ public class Mobsnorender {
             }
         }
     }
-/*
-   @SubscribeEvent
-    public void onRenderWorldLast(RenderWorldLastEvent event) {
+
+    @SubscribeEvent
+    public void onWorldRenderLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
+        RenderGlobal renderGlobal = mc.renderGlobal;
         World world = mc.theWorld;
-        double x = mc.thePlayer.posX;
-        double y = mc.thePlayer.posY;
-        double z = mc.thePlayer.posZ;
 
         for (Object obj : world.loadedTileEntityList) {
             if (obj instanceof TileEntity) {
                 TileEntity tileEntity = (TileEntity) obj;
                 if (tileEntity != null) {
-                    // Check if the TileEntity is not blacklisted
+                    // Check if the TileEntity is in the blacklist
                     if (tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
-                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                        if (renderer != null) {
-                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - RenderManager.renderPosX, tileEntity.yCoord - RenderManager.renderPosY, tileEntity.zCoord- RenderManager.renderPosZ, 0.0f);
-                        }
+                        // Tile Entity is in blacklist, do not cancel rendering
                     } else {
                         // Check if the TileEntity should be rendered based on its distance from the player
-                        double distanceX = Math.abs(tileEntity.xCoord - x);
-                        double distanceY = Math.abs(tileEntity.yCoord - y);
-                        double distanceZ = Math.abs(tileEntity.zCoord - z);
+                        double distanceX = Math.abs(tileEntity.xCoord - mc.thePlayer.posX);
+                        double distanceY = Math.abs(tileEntity.yCoord - mc.thePlayer.posY);
+                        double distanceZ = Math.abs(tileEntity.zCoord - mc.thePlayer.posZ);
                         if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
-                            // If the TileEntity is too far away, skip rendering it
-                            continue;
-                        }
-                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                        if (renderer != null) {
-                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - RenderManager.renderPosX, tileEntity.yCoord - RenderManager.renderPosY, tileEntity.zCoord - RenderManager.renderPosZ, 0.0f);
+                            // If the TileEntity is too far away, cancel rendering it
+                            tileEntity.markDirty(); // Force a full update of the Tile Entity
+                            renderGlobal.markBlockForRenderUpdate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
                         }
                     }
                 }
             }
         }
-   }
- */
+    }
 }
