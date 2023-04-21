@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -138,6 +139,7 @@ public class Mobsnorender {
         }
     }
     private Map<TileEntity, TileEntitySpecialRenderer> renderersSpecial = new HashMap<>();
+
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         // Iterate over all Tile Entities in the world
@@ -150,10 +152,6 @@ public class Mobsnorender {
                     continue;
                 }
                 // Check if the Tile Entity has a special renderer
-                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                    // Check distance from player to Tile Entity
-                    boolean shouldRender = true;
-                    // Check if the Tile Entity has a special renderer
                     if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
                         // Check distance from player to Tile Entity
                         double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
@@ -162,25 +160,21 @@ public class Mobsnorender {
                         if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
                             // Distance is too great, remove Tile Entity special renderer if it exists
                             if (renderersSpecial.containsKey(tileEntity)) {
-                                TileEntitySpecialRenderer renderer = renderersSpecial.remove(tileEntity);
-                                renderer.func_147496_a(tileEntity.getWorldObj());
-                                // Set renderer object to null after removing it from the map
-                                renderer = null;
+                                TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
+                                if (renderer != null) {
+                                    renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
+                                }
                             }
-                            shouldRender = false;
-                        } else {
-                            // Tile Entity has a special renderer and is within range, add to special renderer list if not already there
-                            if (!renderersSpecial.containsKey(tileEntity)) {
-                                TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                                renderersSpecial.put(tileEntity, renderer);
-                            renderer.func_147496_a(tileEntity.getWorldObj());
                         }
-                        // Render Tile Entity using special renderer
-                        renderersSpecial.get(tileEntity).renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                     }
+                    // Always render Tile Entity with special renderer
+                    if (!renderersSpecial.containsKey(tileEntity)) {
+                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                        renderersSpecial.put(tileEntity, renderer);
+                        renderer.func_147496_a(tileEntity.getWorldObj());
+                    }
+                    renderersSpecial.get(tileEntity).renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                 }
             }
         }
     }
-    }
-}
