@@ -152,29 +152,33 @@ public class Mobsnorender {
                     continue;
                 }
                 // Check if the Tile Entity has a special renderer
-                    if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                        // Check distance from player to Tile Entity
-                        double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
-                        double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
-                        double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
-                        if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
-                            // Distance is too great, remove Tile Entity special renderer if it exists
-                            if (renderersSpecial.containsKey(tileEntity)) {
-                                TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
-                                if (renderer != null) {
-                                    renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
-                                }
+                if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                    // Check distance from player to Tile Entity
+                    double distanceX = tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX;
+                    double distanceY = tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY;
+                    double distanceZ = tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ;
+                    if (distanceX > this.distanceXTileEntity || distanceY > this.distanceYTileEntity || distanceZ > this.distanceZTileEntity) {
+                        // Distance is too great, remove Tile Entity special renderer if it exists
+                        if (renderersSpecial.containsKey(tileEntity)) {
+                            TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
+                            if (renderer != null) {
+                                renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                             }
                         }
+                    } else {
+                        // Always render Tile Entity with special renderer
+                        if (!renderersSpecial.containsKey(tileEntity)) {
+                            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                            renderersSpecial.put(tileEntity, renderer);
+                            renderer.func_147496_a(tileEntity.getWorldObj());
+                        }
+                        TileEntitySpecialRenderer renderer = renderersSpecial.get(tileEntity);
+                        if (renderer != null) {
+                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
+                        }
                     }
-                    // Always render Tile Entity with special renderer
-                    if (!renderersSpecial.containsKey(tileEntity)) {
-                        TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                        renderersSpecial.put(tileEntity, renderer);
-                        renderer.func_147496_a(tileEntity.getWorldObj());
-                    }
-                    renderersSpecial.get(tileEntity).renderTileEntityAt(tileEntity, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, event.partialTicks);
                 }
             }
         }
     }
+}
