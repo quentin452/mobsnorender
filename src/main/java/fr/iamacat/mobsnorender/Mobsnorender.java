@@ -36,7 +36,7 @@ import net.minecraftforge.common.config.Configuration;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
-    
+    private static final String VERSION = "0.3"; // Change this to the desired version
     private final List<String> blacklist = new ArrayList<String>();
 
     private final List<String> tileEntityBlacklist = new ArrayList<String>();
@@ -61,18 +61,23 @@ public class Mobsnorender {
         // Load configuration values from configuration file
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 
-        String loadedConfigVersion = config.getLoadedConfigVersion();
-        if (loadedConfigVersion == null || !loadedConfigVersion.equals("0.2")) {// Change this config version to reset config file when mod update
+        // Get the loaded config version from the configuration file
+        String loadedModVersion = config.getLoadedConfigVersion();
+
+        // Check if the loaded config version matches the current mod version
+        if (loadedModVersion == null || !loadedModVersion.equals(VERSION)) {
             // Delete the old config
             event.getSuggestedConfigurationFile().delete();
-            // Create a new config with default version
-            config = new Configuration(event.getSuggestedConfigurationFile(), "0.2");// Change this config version to reset config file when mod update
+
+            // Get the config version from the configuration file or use the default value if it doesn't exist
+            String configVersion = config.getString("config_version", Configuration.CATEGORY_GENERAL, VERSION, "The version of the configuration file. Change this to reset the configuration file.");
+
+            // Create a new config with the specified config version
+            config = new Configuration(event.getSuggestedConfigurationFile(), configVersion);
         }
 
-
-
+        // Load the configuration file
         config.load();
-
 
         // Get entity names to exclude from configuration
         String[] blacklistArray = config.getStringList("00_blacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller");
@@ -100,7 +105,10 @@ public class Mobsnorender {
         distanceYTileEntity = config.getInt("06_distanceYTileEntity_BROKEN", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
         distanceZTileEntity = config.getInt("07_distanceZTileEntity_BROKEN", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
 
-        config.save();  // save the configuration file
+        // Save the updated configuration file
+        if (config.hasChanged()) {
+            config.save();
+        }
     }
 
     @Mod.EventHandler
@@ -134,6 +142,7 @@ public class Mobsnorender {
             }
         }
 
+    TileEntityRendererDispatcher tileEntityRenderer = TileEntityRendererDispatcher.instance;
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -155,24 +164,26 @@ public class Mobsnorender {
         // Get all tile entities within the bounding box
         List<TileEntity> tileEntities = world.getEntitiesWithinAABB(TileEntity.class, bb);
 
+        Map<Class<? extends TileEntity>, TileEntitySpecialRenderer> specialRenderers = new HashMap<>(tileEntityRenderer.mapSpecialRenderers);
         for (TileEntity tileEntity : tileEntities) {
-            // Check if the tile entity is associated with a special renderer
-            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-
-            if (renderer != null) {
-                // Check if the tile entity should be rendered
-                Vec3 playerPos = Vec3.createVectorHelper(x, y, z);
-                Vec3 tilePos = Vec3.createVectorHelper(tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 0.5); // add 0.5 to center the tile entity
-                double distance = playerPos.distanceTo(tilePos);
-                if (distance <= this.distanceXTileEntity && Math.abs(y - tileEntity.yCoord) <= this.distanceYTileEntity && distance <= this.distanceZTileEntity) {
-                    // Render the tile entity
-                    renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - x, tileEntity.yCoord - y, tileEntity.zCoord - z, event.partialTicks);
+            if (tileEntity != null) {
+                if (tileEntityBlacklist.contains(tileEntity.getClass().getSimpleName().toLowerCase())) {
+                    specialRenderers.remove(tileEntity.getClass());
                 } else {
-                    // Disable the rendering of the tile entity
-                    TileEntityRendererDispatcher.instance.mapSpecialRenderers.remove(tileEntity.getClass());
-
+                    TileEntitySpecialRenderer renderer = tileEntityRenderer.getSpecialRenderer(tileEntity);
+                    if (renderer != null) {
+                        Vec3 playerPos = Vec3.createVectorHelper(x, y, z);
+                        Vec3 tilePos = Vec3.createVectorHelper(tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 0.5);
+                        double distance = playerPos.distanceTo(tilePos);
+                        if (distance <= this.distanceXTileEntity && Math.abs(y - tileEntity.yCoord) <= this.distanceYTileEntity && distance <= this.distanceZTileEntity) {
+                            renderer.renderTileEntityAt(tileEntity, tileEntity.xCoord - x, tileEntity.yCoord - y, tileEntity.zCoord - z, event.partialTicks);
+                        } else {
+                            specialRenderers.remove(tileEntity.getClass());
+                        }
+                    }
                 }
             }
         }
+        tileEntityRenderer.mapSpecialRenderers = specialRenderers;
     }
-    }
+}

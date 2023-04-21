@@ -14,9 +14,7 @@ add a config to disabling entitydistance et tile entity distance
 
 add config to disabling all entity from rendering ambient/agressive entity/passive entity
 
-add a blackist to the entity rendering removal
-
-fix tile entity renderer doesn't work
+fix tile entity renderer canceller doesn't work
 
 # Links to descriptions of my projects.
 
