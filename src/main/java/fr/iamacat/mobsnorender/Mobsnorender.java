@@ -144,27 +144,40 @@ public class Mobsnorender {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         double playerX = player.posX;
         double playerY = player.posY;
         double playerZ = player.posZ;
         World world = player.worldObj;
 
-        AxisAlignedBB boundingBox = AxisAlignedBB.getBoundingBox(playerX - distanceXTileEntity, playerY - distanceYTileEntity, playerZ - distanceZTileEntity, playerX + distanceXTileEntity, playerY + distanceYTileEntity, playerZ + distanceZTileEntity);
-        List<TileEntity> nearbyTileEntities = world.getEntitiesWithinAABB(TileEntity.class, boundingBox);
-
-        for (TileEntity tileEntity : nearbyTileEntities) {
-            // Check if the Tile Entity has a special renderer
-            if (TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                // Check if the Tile Entity is not in the blacklist
-                if (!tileEntityBlacklist.contains(tileEntity.getClass())) {
-                    TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-                    renderer.func_147496_a(tileEntity.getWorldObj());
-                    renderer.renderTileEntityAt(tileEntity, (float)playerX, (float)playerY, (float)playerZ, event.partialTicks);
-                }
+        for (Object obj : world.loadedTileEntityList) {
+            if (!(obj instanceof TileEntity)) {
+                continue;
             }
+            TileEntity tileEntity = (TileEntity) obj;
+
+            System.out.println("Processing tile entity " + tileEntity.getClass().getSimpleName());
+
+            if (!TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
+                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it has no special renderer.");
+                continue;
+            }
+            if (tileEntityBlacklist.contains(tileEntity.getClass())) {
+                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is blacklisted.");
+                continue;
+            }
+            double x = tileEntity.xCoord + 0.5 - playerX;
+            double y = tileEntity.yCoord + 0.5 - playerY;
+            double z = tileEntity.zCoord + 0.5 - playerZ;
+            double distanceSq = x * x + y * y + z * z;
+            double maxDistanceSq = distanceXTileEntity * distanceXTileEntity + distanceYTileEntity * distanceYTileEntity + distanceZTileEntity * distanceZTileEntity;
+            if (distanceSq > maxDistanceSq) {
+                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away.");
+                continue;
+            }
+            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+            renderer.func_147496_a(tileEntity.getWorldObj());
+            renderer.renderTileEntityAt(tileEntity, (float) playerX, (float) playerY, (float) playerZ, event.partialTicks);
         }
     }
-
 }
