@@ -7,31 +7,26 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.tilentity.CustomTileEntityChestRenderer;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.HashMap;
 
 import java.util.*;
 
 import net.minecraftforge.common.config.Configuration;
-import org.lwjgl.opengl.GL11;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
@@ -120,7 +115,7 @@ public class Mobsnorender {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
     }
-
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
         // Check if the entity is not null and is a living entity
@@ -141,27 +136,29 @@ public class Mobsnorender {
             }
         }
     }
-
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        if (player == null) {
+            return;
+        }
         double playerX = player.posX;
         double playerY = player.posY;
         double playerZ = player.posZ;
         World world = player.worldObj;
+        if (world == null) {
+            return;
+        }
 
         for (Object obj : world.loadedTileEntityList) {
-            if (!(obj instanceof TileEntity)) {
+            if (obj == null || !(obj instanceof TileEntity)) {
                 continue;
             }
             TileEntity tileEntity = (TileEntity) obj;
 
             System.out.println("Processing tile entity " + tileEntity.getClass().getSimpleName());
 
-            if (!TileEntityRendererDispatcher.instance.hasSpecialRenderer(tileEntity)) {
-                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it has no special renderer.");
-                continue;
-            }
             if (tileEntityBlacklist.contains(tileEntity.getClass())) {
                 System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is blacklisted.");
                 continue;
@@ -175,7 +172,14 @@ public class Mobsnorender {
                 System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away.");
                 continue;
             }
+            if (Math.abs(y) > tileEntity.xCoord) {
+                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away in Y.");
+                continue;
+            }
             TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+            if (renderer == null) {
+                continue;
+            }
             renderer.func_147496_a(tileEntity.getWorldObj());
             renderer.renderTileEntityAt(tileEntity, (float) playerX, (float) playerY, (float) playerZ, event.partialTicks);
         }
