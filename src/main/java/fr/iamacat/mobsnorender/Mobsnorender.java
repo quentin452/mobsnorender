@@ -11,10 +11,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -139,17 +144,16 @@ public class Mobsnorender {
         if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
             EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
             String name = livingEntity.getCommandSenderName().toLowerCase();
+            boolean cancelAmbientRendering = false;
+            boolean cancelAggressiveRendering = false;
+            boolean cancelPassiveRendering = false;
             if (entityblacklist.contains(name)) {
                 // Entity is in blacklist, do not cancel rendering
             } else {
-                // Entity is not in blacklist, check distance and cancel rendering if necessary
+                // Check distance and cancel rendering if necessary
                 double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
                 double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
                 double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
-                boolean cancelAmbientRendering = false;
-                boolean cancelAggressiveRendering = false;
-                boolean cancelPassiveRendering = false;
-
 
                 // Check the entity type and distance
                 if (livingEntity instanceof EntityAmbientCreature) {
@@ -165,18 +169,19 @@ public class Mobsnorender {
                         cancelPassiveRendering = !notcancelPassiveRendering;
                     }
                 }
-                if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature) {
-                    event.setCanceled(true);
-                    }
-                if (cancelAggressiveRendering && livingEntity instanceof EntityMob) {
-                    event.setCanceled(true);
-                    }
-                if (cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
-                    event.setCanceled(true);
-                }
+            }
+            if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature) {
+                event.setCanceled(true);
+            }
+            if (cancelAggressiveRendering && livingEntity instanceof EntityMob) {
+                event.setCanceled(true);
+            }
+            if (cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
+                event.setCanceled(true);
             }
         }
     }
+}
     /* i don't know why but doesn't work
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
@@ -220,4 +225,3 @@ public class Mobsnorender {
     }
 
      */
-}
