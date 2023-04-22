@@ -10,7 +10,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
-import fr.iamacat.mobsnorender.tilentity.CustomTileEntityChestRenderer;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -53,8 +52,6 @@ public class Mobsnorender {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
-        // Register the CustomTileEntityChestRenderer class with Minecraft
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChest.class, new CustomTileEntityChestRenderer());
     }
 
     @Mod.EventHandler
@@ -160,19 +157,13 @@ public class Mobsnorender {
             System.out.println("Processing tile entity " + tileEntity.getClass().getSimpleName());
 
             if (tileEntityBlacklist.contains(tileEntity.getClass())) {
-                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is blacklisted.");
-                continue;
-            }
-            double x = tileEntity.xCoord + 0.5 - playerX;
-            double y = tileEntity.yCoord + 0.5 - playerY;
-            double z = tileEntity.zCoord + 0.5 - playerZ;
-            double distanceSq = x * x + y * y + z * z;
-            double maxDistanceSq = distanceXTileEntity * distanceXTileEntity + distanceYTileEntity * distanceYTileEntity + distanceZTileEntity * distanceZTileEntity;
-            if (distanceSq > maxDistanceSq) {
-                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away.");
-                continue;
-            }
-            if (Math.abs(y) > tileEntity.xCoord) {
+                // Tile Entity is in blacklist, do not cancel rendering
+            } else {
+                // Tile Entity is not in blacklist, check distance and cancel rendering if necessary
+                double distanceX = Math.abs(tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX);
+                double distanceY = Math.abs(tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY);
+                double distanceZ = Math.abs(tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ);
+                if (distanceX > this.distanceXEntity || distanceY > this.distanceYEntity || distanceZ > this.distanceZEntity) {
                 System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away in Y.");
                 continue;
             }
@@ -182,6 +173,7 @@ public class Mobsnorender {
             }
             renderer.func_147496_a(tileEntity.getWorldObj());
             renderer.renderTileEntityAt(tileEntity, (float) playerX, (float) playerY, (float) playerZ, event.partialTicks);
+            }
         }
     }
 }
