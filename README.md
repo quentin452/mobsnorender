@@ -16,6 +16,8 @@ add togglable via keybind
 
 add a way to remove entities collisions between entities
 
+add a way to skip flame effect in function of X Y Z and the player: example zombie when flamed by the sun
+
 fix tile entity renderer canceller doesn't work
 
 # Links to descriptions of my projects.
