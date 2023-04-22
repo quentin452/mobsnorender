@@ -30,17 +30,17 @@ import net.minecraftforge.common.config.Configuration;
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
-    private static final String VERSION = "0.5"; // Change this to the desired version
+    private static final String VERSION = "0.6"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<String>();
-    private final List<String> tileEntityBlacklist = new ArrayList<>();
+   // private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
     private int distanceXEntity = 48;
     private int distanceYEntity = 32;
     private int distanceZEntity = 48;
-    private int distanceXTileEntity = 64;
-    private int distanceYTileEntity = 48;
-    private int distanceZTileEntity = 64;
+//    private int distanceXTileEntity = 64;
+//    private int distanceYTileEntity = 48;
+//    private int distanceZTileEntity = 64;
 
     @Mod.Instance(Reference.MOD_ID)
     public static Mobsnorender instance;
@@ -81,10 +81,10 @@ public class Mobsnorender {
         String[] blacklistArray = config.getStringList("00_entityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton>");
 
         // Add tile entity names to blacklist
-        String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
-        for (String tileEntityName : tileEntityBlacklistArray) {
-            tileEntityBlacklist.add(tileEntityName.toLowerCase());
-        }
+  //      String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
+   //     for (String tileEntityName : tileEntityBlacklistArray) {
+   //         tileEntityBlacklist.add(tileEntityName.toLowerCase());
+    //    }
 
         // Add entity names to blacklist
         for (String entityName : blacklistArray) {
@@ -99,9 +99,9 @@ public class Mobsnorender {
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update default values.
 
-        distanceXTileEntity = config.getInt("05_distanceXTileEntity_BROKEN", "general", 64, 1, 1000, "The maximum X distance to render tile entities(X and Z must be equalized)");
-        distanceYTileEntity = config.getInt("06_distanceYTileEntity_BROKEN", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
-        distanceZTileEntity = config.getInt("07_distanceZTileEntity_BROKEN", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
+      //  distanceXTileEntity = config.getInt("05_distanceXTileEntity_BROKEN", "general", 64, 1, 1000, "The maximum X distance to render tile entities(X and Z must be equalized)");
+      //  distanceYTileEntity = config.getInt("06_distanceYTileEntity_BROKEN", "general", 48, 1, 1000, "The maximum Y distance to render tile entities");
+     //   distanceZTileEntity = config.getInt("07_distanceZTileEntity_BROKEN", "general", 64, 1, 1000, "The maximum Z distance to render tile entities(X and Z must be equalized)");
 
         // Save the updated configuration file
         if (config.hasChanged()) {
@@ -133,6 +133,7 @@ public class Mobsnorender {
             }
         }
     }
+    /* idk why but doesn't work
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -154,26 +155,25 @@ public class Mobsnorender {
             }
             TileEntity tileEntity = (TileEntity) obj;
 
-            System.out.println("Processing tile entity " + tileEntity.getClass().getSimpleName());
-
             if (tileEntityBlacklist.contains(tileEntity.getClass())) {
                 // Tile Entity is in blacklist, do not cancel rendering
             } else {
                 // Tile Entity is not in blacklist, check distance and cancel rendering if necessary
-                double distanceX = Math.abs(tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX);
-                double distanceY = Math.abs(tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY);
-                double distanceZ = Math.abs(tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ);
+                double distanceX = Math.sqrt(Math.pow(tileEntity.xCoord - Minecraft.getMinecraft().thePlayer.posX, 2));
+                double distanceY = Math.sqrt(Math.pow(tileEntity.yCoord - Minecraft.getMinecraft().thePlayer.posY, 2));
+                double distanceZ = Math.sqrt(Math.pow(tileEntity.zCoord - Minecraft.getMinecraft().thePlayer.posZ, 2));
                 if (distanceX > this.distanceXEntity || distanceY > this.distanceYEntity || distanceZ > this.distanceZEntity) {
-                System.out.println("Skipping tile entity " + tileEntity.getClass().getSimpleName() + " as it is too far away in Y.");
-                continue;
-            }
-            TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
-            if (renderer == null) {
-                continue;
-            }
-            renderer.func_147496_a(tileEntity.getWorldObj());
-            renderer.renderTileEntityAt(tileEntity, (float) playerX, (float) playerY, (float) playerZ, event.partialTicks);
+                    continue;
+                }
+                TileEntitySpecialRenderer renderer = TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
+                if (renderer == null) {
+                    continue;
+                }
+                renderer.func_147496_a(tileEntity.getWorldObj());
+                renderer.renderTileEntityAt(tileEntity, (float) playerX, (float) playerY, (float) playerZ, event.partialTicks);
             }
         }
     }
+
+     */
 }
