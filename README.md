@@ -10,11 +10,7 @@ Have more performance in my 1.7.10 modpacks
 
 dynamically change X Y Z coord if alot of mobs are rendered
 
-add config to disabling all entity from rendering ambient/agressive entity/passive entity
-
 add a config to completly disabling entities rendering
-
-add a config to disabling all entity rendering + tileentity rendering , and removing the shadow of entity
 
 add togglable via keybind
 

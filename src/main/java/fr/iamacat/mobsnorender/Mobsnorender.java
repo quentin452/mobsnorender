@@ -25,18 +25,18 @@ import net.minecraftforge.common.config.Configuration;
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
-    private static final String VERSION = "1.1"; // Change this to the desired version
+    private static final String VERSION = "1.2"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<String>();
    // private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
     private int distanceXAmbient = 32;
-    private int distanceYAmbient = 16;
+    private int distanceYAmbient = 24;
     private int distanceZAmbient = 32;
 
-    private int distanceXAggressive = 60;
-    private int distanceYAggressive = 32;
-    private int distanceZAggressive = 60;
+    private int distanceXAggressive = 64;
+    private int distanceYAggressive = 24;
+    private int distanceZAggressive = 64;
 
     private int distanceXPassive = 48;
     private int distanceYPassive = 24;
@@ -103,19 +103,19 @@ public class Mobsnorender {
 
         notcancelAgressiveRendering = config.getBoolean("02_distanceXAggressiveEntity", "general", false, "Disable the Aggressive entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXAggressive = config.getInt("03_distanceXAggressiveEntity", "general", 48, 1, 1000, "The maximum X distance to render aggressive entities(X and Z must be equalized)");
-        distanceYAggressive = config.getInt("04_distanceYAggressiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render aggressive entities");
-        distanceZAggressive = config.getInt("05_distanceZAggressiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render aggressive entities(X and Z must be equalized)");
+        distanceXAggressive = config.getInt("03_distanceXAggressiveEntity", "general", 64, 1, 1000, "The maximum X distance to render aggressive entities(X and Z must be equalized)");
+        distanceYAggressive = config.getInt("04_distanceYAggressiveEntity", "general", 24, 1, 1000, "The maximum Y distance to render aggressive entities");
+        distanceZAggressive = config.getInt("05_distanceZAggressiveEntity", "general", 64, 1, 1000, "The maximum Z distance to render aggressive entities(X and Z must be equalized)");
         notcancelPassiveRendering = config.getBoolean("06_distanceXPassiveEntity", "general", false, "Disable the Passive entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
         distanceXPassive = config.getInt("07_distanceXPassiveEntity", "general", 48, 1, 1000, "The maximum X distance to render passive entities(X and Z must be equalized)");
-        distanceYPassive = config.getInt("08_distanceYPassiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render passive entities");
+        distanceYPassive = config.getInt("08_distanceYPassiveEntity", "general", 24, 1, 1000, "The maximum Y distance to render passive entities");
         distanceZPassive = config.getInt("09_distanceZPassiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render passive entities(X and Z must be equalized)");
         notcancelAmbientRendering = config.getBoolean("10_distanceXAmbientEntity", "general", false, "Disable the Ambient entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXAmbient = config.getInt("11_distanceXAmbientEntity", "general", 48, 1, 1000, "The maximum X distance to render ambient entities(X and Z must be equalized)");
-        distanceYAmbient = config.getInt("12_distanceYAmbientEntity", "general", 32, 1, 1000, "The maximum Y distance to render ambient entities");
-        distanceZAmbient = config.getInt("13_distanceZAmbientEntity", "general", 48, 1, 1000, "The maximum Z distance to render ambient entities(X and Z must be equalized)");
+        distanceXAmbient = config.getInt("11_distanceXAmbientEntity", "general", 32, 1, 1000, "The maximum X distance to render ambient entities(X and Z must be equalized)");
+        distanceYAmbient = config.getInt("12_distanceYAmbientEntity", "general", 24, 1, 1000, "The maximum Y distance to render ambient entities");
+        distanceZAmbient = config.getInt("13_distanceZAmbientEntity", "general", 32, 1, 1000, "The maximum Z distance to render ambient entities(X and Z must be equalized)");
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update default values.
 
@@ -154,15 +154,15 @@ public class Mobsnorender {
                 // Check the entity type and distance
                 if (livingEntity instanceof EntityAmbientCreature) {
                     if (distanceX > this.distanceXAmbient || distanceY > this.distanceYAmbient || distanceZ > this.distanceZAmbient) {
-                        cancelAmbientRendering = true;
+                        cancelAmbientRendering = !notcancelAmbientRendering;
                     }
                 } else if (livingEntity instanceof EntityMob) {
                     if (distanceX > this.distanceXAggressive || distanceY > this.distanceYAggressive || distanceZ > this.distanceZAggressive) {
-                        cancelAggressiveRendering = true;
+                        cancelAggressiveRendering = !notcancelAgressiveRendering;
                     }
                 } else if (livingEntity instanceof EntityAnimal) {
                     if (distanceX > this.distanceXPassive || distanceY > this.distanceYPassive || distanceZ > this.distanceZPassive) {
-                        cancelPassiveRendering = true;
+                        cancelPassiveRendering = !notcancelPassiveRendering;
                     }
                 }
                 if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature) {
