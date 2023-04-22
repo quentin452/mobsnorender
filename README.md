@@ -14,6 +14,8 @@ add a config to completly disabling entities rendering
 
 add togglable via keybind
 
+add a way to remove entities collisions between entities
+
 fix tile entity renderer canceller doesn't work
 
 # Links to descriptions of my projects.
