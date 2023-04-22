@@ -15,6 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.passive.EntityAmbientCreature;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -30,14 +33,22 @@ import net.minecraftforge.common.config.Configuration;
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
-    private static final String VERSION = "0.6"; // Change this to the desired version
+    private static final String VERSION = "0.8"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<String>();
    // private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
-    private int distanceXEntity = 48;
-    private int distanceYEntity = 32;
-    private int distanceZEntity = 48;
+    private int distanceXAmbient = 48;
+    private int distanceYAmbient = 32;
+    private int distanceZAmbient = 48;
+
+    private int distanceXAggressive = 48;
+    private int distanceYAggressive = 32;
+    private int distanceZAggressive = 48;
+
+    private int distanceXPassive = 48;
+    private int distanceYPassive = 32;
+    private int distanceZPassive = 48;
 //    private int distanceXTileEntity = 64;
 //    private int distanceYTileEntity = 48;
 //    private int distanceZTileEntity = 64;
@@ -78,7 +89,7 @@ public class Mobsnorender {
         config.load();
 
         // Get entity names to exclude from configuration
-        String[] blacklistArray = config.getStringList("00_entityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton>");
+        String[] blacklistArray = config.getStringList("00_universalentityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton> IMPORTANT add as a list , no as a line because because the config will be resseted");
 
         // Add tile entity names to blacklist
   //      String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
@@ -93,9 +104,17 @@ public class Mobsnorender {
 
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXEntity = config.getInt("01_distanceXEntity", "general", 48, 1, 1000, "The maximum X distance to render entities(X and Z must be equalized)");
-        distanceYEntity = config.getInt("02_distanceYEntity", "general", 32, 1, 1000, "The maximum Y distance to render entities");
-        distanceZEntity = config.getInt("03_distanceZEntity", "general", 48, 1, 1000, "The maximum Z distance to render entities(X and Z must be equalized)");
+        distanceXAggressive = config.getInt("01_distanceXAggressiveEntity", "general", 48, 1, 1000, "The maximum X distance to render aggressive entities(X and Z must be equalized)");
+        distanceYAggressive = config.getInt("02_distanceYAggressiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render aggressive entities");
+        distanceZAggressive = config.getInt("03_distanceZAggressiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render aggressive entities(X and Z must be equalized)");
+        // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
+        distanceXPassive = config.getInt("04_distanceXPassiveEntity", "general", 48, 1, 1000, "The maximum X distance to render passive entities(X and Z must be equalized)");
+        distanceYPassive = config.getInt("05_distanceYPassiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render passive entities");
+        distanceZPassive = config.getInt("06_distanceZPassiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render passive entities(X and Z must be equalized)");
+        // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
+        distanceXAmbient = config.getInt("07_distanceXAmbientEntity", "general", 48, 1, 1000, "The maximum X distance to render ambient entities(X and Z must be equalized)");
+        distanceYAmbient = config.getInt("08_distanceYAmbientEntity", "general", 32, 1, 1000, "The maximum Y distance to render ambient entities");
+        distanceZAmbient = config.getInt("09_distanceZAmbientEntity", "general", 48, 1, 1000, "The maximum Z distance to render ambient entities(X and Z must be equalized)");
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update default values.
 
@@ -117,18 +136,41 @@ public class Mobsnorender {
     public void onRenderLiving(RenderLivingEvent.Pre event) {
         // Check if the entity is not null and is a living entity
         if (event.entity != null && (event.entity instanceof EntityLivingBase)) {
-            if (event.entity instanceof EntityLivingBase) {
-                EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
-                if (entityblacklist.contains(livingEntity.getCommandSenderName().toLowerCase())) {
-                    // Entity is in blacklist, do not cancel rendering
-                } else {
-                    // Entity is not in blacklist, check distance and cancel rendering if necessary
-                    double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
-                    double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
-                    double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
-                    if (distanceX > this.distanceXEntity || distanceY > this.distanceYEntity || distanceZ > this.distanceZEntity) {
-                        event.setCanceled(true);
+            EntityLivingBase livingEntity = (EntityLivingBase) event.entity;
+            String name = livingEntity.getCommandSenderName().toLowerCase();
+            if (entityblacklist.contains(name)) {
+                // Entity is in blacklist, do not cancel rendering
+            } else {
+                // Entity is not in blacklist, check distance and cancel rendering if necessary
+                double distanceX = Math.abs(livingEntity.posX - Minecraft.getMinecraft().thePlayer.posX);
+                double distanceY = Math.abs(livingEntity.posY - Minecraft.getMinecraft().thePlayer.posY);
+                double distanceZ = Math.abs(livingEntity.posZ - Minecraft.getMinecraft().thePlayer.posZ);
+                boolean cancelAmbientRendering = false;
+                boolean cancelAggressiveRendering = false;
+                boolean cancelPassiveRendering = false;
+
+
+                // Check the entity type and distance
+                if (livingEntity instanceof EntityAmbientCreature) {
+                    if (distanceX > this.distanceXAmbient || distanceY > this.distanceYAmbient || distanceZ > this.distanceZAmbient) {
+                        cancelAmbientRendering = true;
                     }
+                } else if (livingEntity instanceof EntityMob) {
+                    if (distanceX > this.distanceXAggressive || distanceY > this.distanceYAggressive || distanceZ > this.distanceZAggressive) {
+                        cancelAggressiveRendering = true;
+                    }
+                } else if (livingEntity instanceof EntityAnimal) {
+                    if (distanceX > this.distanceXPassive || distanceY > this.distanceYPassive || distanceZ > this.distanceZPassive) {
+                        cancelPassiveRendering = true;
+                    }
+                }
+
+                if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature) {
+                    event.setCanceled(true);
+                } else if (cancelAggressiveRendering && livingEntity instanceof EntityMob) {
+                    event.setCanceled(true);
+                } else if (cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
+                    event.setCanceled(true);
                 }
             }
         }
