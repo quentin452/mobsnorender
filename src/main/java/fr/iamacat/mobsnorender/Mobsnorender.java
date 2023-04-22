@@ -269,7 +269,9 @@ public class Mobsnorender {
                     }
                 }
             }
-            if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature || cancelAggressiveRendering && livingEntity instanceof EntityMob || cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
+            if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature
+                || cancelAggressiveRendering && livingEntity instanceof EntityMob
+                || cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
                 event.setCanceled(true); // cancel the rendering , it seem a duplicated things like setInvisible , but i get alot of more performance if i use this code
                 EntityLivingBase entityLivingBase = (EntityLivingBase) livingEntity;
                 entityLivingBase.setInvisible(true); // make shadow invisible
