@@ -1,6 +1,5 @@
 package fr.iamacat.mobsnorender;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -12,18 +11,11 @@ import cpw.mods.fml.relauncher.SideOnly;
 import fr.iamacat.mobsnorender.proxy.CommonProxy;
 import fr.iamacat.mobsnorender.utils.Reference;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
@@ -33,22 +25,29 @@ import net.minecraftforge.common.config.Configuration;
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.MOD_VERSION, acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
-    private static final String VERSION = "0.8"; // Change this to the desired version
+    private static final String VERSION = "1.1"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<String>();
    // private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
-    private int distanceXAmbient = 48;
-    private int distanceYAmbient = 32;
-    private int distanceZAmbient = 48;
+    private int distanceXAmbient = 32;
+    private int distanceYAmbient = 16;
+    private int distanceZAmbient = 32;
 
-    private int distanceXAggressive = 48;
+    private int distanceXAggressive = 60;
     private int distanceYAggressive = 32;
-    private int distanceZAggressive = 48;
+    private int distanceZAggressive = 60;
 
     private int distanceXPassive = 48;
-    private int distanceYPassive = 32;
+    private int distanceYPassive = 24;
     private int distanceZPassive = 48;
+
+    private boolean notcancelAmbientRendering = true;
+
+    private boolean notcancelPassiveRendering = true;
+
+    private boolean notcancelAgressiveRendering = true;
+
 //    private int distanceXTileEntity = 64;
 //    private int distanceYTileEntity = 48;
 //    private int distanceZTileEntity = 64;
@@ -89,7 +88,7 @@ public class Mobsnorender {
         config.load();
 
         // Get entity names to exclude from configuration
-        String[] blacklistArray = config.getStringList("00_universalentityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton> IMPORTANT add as a list , no as a line because because the config will be resseted");
+        String[] blacklistArray = config.getStringList("01_universalentityblacklist", "general", new String[]{}, "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton> IMPORTANT add as a list , no as a line because the config will be reseted");
 
         // Add tile entity names to blacklist
   //      String[] tileEntityBlacklistArray = config.getStringList("04_tileEntityBlacklist_BROKEN", "general", new String[]{}, "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
@@ -102,19 +101,21 @@ public class Mobsnorender {
             entityblacklist.add(entityName.toLowerCase());
         }
 
-
+        notcancelAgressiveRendering = config.getBoolean("02_distanceXAggressiveEntity", "general", false, "Disable the Aggressive entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXAggressive = config.getInt("01_distanceXAggressiveEntity", "general", 48, 1, 1000, "The maximum X distance to render aggressive entities(X and Z must be equalized)");
-        distanceYAggressive = config.getInt("02_distanceYAggressiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render aggressive entities");
-        distanceZAggressive = config.getInt("03_distanceZAggressiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render aggressive entities(X and Z must be equalized)");
+        distanceXAggressive = config.getInt("03_distanceXAggressiveEntity", "general", 48, 1, 1000, "The maximum X distance to render aggressive entities(X and Z must be equalized)");
+        distanceYAggressive = config.getInt("04_distanceYAggressiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render aggressive entities");
+        distanceZAggressive = config.getInt("05_distanceZAggressiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render aggressive entities(X and Z must be equalized)");
+        notcancelPassiveRendering = config.getBoolean("06_distanceXPassiveEntity", "general", false, "Disable the Passive entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXPassive = config.getInt("04_distanceXPassiveEntity", "general", 48, 1, 1000, "The maximum X distance to render passive entities(X and Z must be equalized)");
-        distanceYPassive = config.getInt("05_distanceYPassiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render passive entities");
-        distanceZPassive = config.getInt("06_distanceZPassiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render passive entities(X and Z must be equalized)");
+        distanceXPassive = config.getInt("07_distanceXPassiveEntity", "general", 48, 1, 1000, "The maximum X distance to render passive entities(X and Z must be equalized)");
+        distanceYPassive = config.getInt("08_distanceYPassiveEntity", "general", 32, 1, 1000, "The maximum Y distance to render passive entities");
+        distanceZPassive = config.getInt("09_distanceZPassiveEntity", "general", 48, 1, 1000, "The maximum Z distance to render passive entities(X and Z must be equalized)");
+        notcancelAmbientRendering = config.getBoolean("10_distanceXAmbientEntity", "general", false, "Disable the Ambient entity canceller?");
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update the default values.
-        distanceXAmbient = config.getInt("07_distanceXAmbientEntity", "general", 48, 1, 1000, "The maximum X distance to render ambient entities(X and Z must be equalized)");
-        distanceYAmbient = config.getInt("08_distanceYAmbientEntity", "general", 32, 1, 1000, "The maximum Y distance to render ambient entities");
-        distanceZAmbient = config.getInt("09_distanceZAmbientEntity", "general", 48, 1, 1000, "The maximum Z distance to render ambient entities(X and Z must be equalized)");
+        distanceXAmbient = config.getInt("11_distanceXAmbientEntity", "general", 48, 1, 1000, "The maximum X distance to render ambient entities(X and Z must be equalized)");
+        distanceYAmbient = config.getInt("12_distanceYAmbientEntity", "general", 32, 1, 1000, "The maximum Y distance to render ambient entities");
+        distanceZAmbient = config.getInt("13_distanceZAmbientEntity", "general", 48, 1, 1000, "The maximum Z distance to render ambient entities(X and Z must be equalized)");
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update default values.
 
@@ -164,18 +165,19 @@ public class Mobsnorender {
                         cancelPassiveRendering = true;
                     }
                 }
-
                 if (cancelAmbientRendering && livingEntity instanceof EntityAmbientCreature) {
                     event.setCanceled(true);
-                } else if (cancelAggressiveRendering && livingEntity instanceof EntityMob) {
+                    }
+                if (cancelAggressiveRendering && livingEntity instanceof EntityMob) {
                     event.setCanceled(true);
-                } else if (cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
+                    }
+                if (cancelPassiveRendering && livingEntity instanceof EntityAnimal) {
                     event.setCanceled(true);
                 }
             }
         }
     }
-    /* idk why but doesn't work
+    /* i don't know why but doesn't work
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
