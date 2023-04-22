@@ -24,7 +24,7 @@ apply plugin: 'forge'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-version = "1.7.10-0.2"
+version = "1.7.10-0.3"
 group= "fr.iamacat.mobsnorender"
 archivesBaseName = "Mobs-no-render"
 
