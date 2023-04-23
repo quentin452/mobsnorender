@@ -34,9 +34,9 @@ import fr.iamacat.mobsnorender.utils.Reference;
     acceptedMinecraftVersions = Reference.MC_VERSION)
 public class Mobsnorender {
 
-    private static final String VERSION = "1.3"; // Change this to the desired version
+    private static final String VERSION = "1.4"; // Change this to the desired version
     private final List<String> entityblacklist = new ArrayList<>();
-    private final List<String> tileEntityBlacklist = new ArrayList<>();
+  //  private final List<String> tileEntityBlacklist = new ArrayList<>();
 
     // Define default values for X, Y, and Z distances
     private int distanceXAmbient = 32;
@@ -57,9 +57,9 @@ public class Mobsnorender {
 
     private boolean notcancelAgressiveRendering = true;
 
-    private int distanceXTileEntity = 64;
-    private int distanceYTileEntity = 48;
-    private int distanceZTileEntity = 64;
+  //  private int distanceXTileEntity = 64;
+  //  private int distanceYTileEntity = 48;
+ //   private int distanceZTileEntity = 64;
 
     @Mod.Instance(Reference.MOD_ID)
     public static Mobsnorender instance;
@@ -109,14 +109,14 @@ public class Mobsnorender {
             "List of entity names to exclude from rendering canceller(example : <Cow,Skeleton> IMPORTANT add as a list , no as a line because the config will be reseted");
 
         // Add tile entity names to blacklist
-        String[] tileEntityBlacklistArray = config.getStringList(
-            "14_tileEntityBlacklist_BROKEN",
-            "general",
-            new String[] {},
-            "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
-        for (String tileEntityName : tileEntityBlacklistArray) {
-            tileEntityBlacklist.add(tileEntityName.toLowerCase());
-        }
+    //    String[] tileEntityBlacklistArray = config.getStringList(
+    //        "14_tileEntityBlacklist_BROKEN",
+    //        "general",
+   //         new String[] {},
+   //         "List of tile entity names to exclude from rendering canceller(example : <minecraft:chest,minecraft:something>");
+  //      for (String tileEntityName : tileEntityBlacklistArray) {
+   //         tileEntityBlacklist.add(tileEntityName.toLowerCase());
+   //     }
 
         // Add entity names to blacklist
         for (String entityName : blacklistArray) {
@@ -200,7 +200,7 @@ public class Mobsnorender {
             "The maximum Z distance to render ambient entities(X and Z must be equalized)");
 
         // Retrieve the X, Y, and Z distance values from the configuration file and use them to update default values.
-
+/*
         distanceXTileEntity = config.getInt(
             "15_distanceXTileEntity_BROKEN",
             "general",
@@ -223,6 +223,8 @@ public class Mobsnorender {
             1000,
             "The maximum Z distance to render tile entities(X and Z must be equalized)");
 
+
+ */
         // Save the updated configuration file
         if (config.hasChanged()) {
             config.save();
@@ -324,6 +326,7 @@ public class Mobsnorender {
      * }
      * }
      */
+    /*
     @SideOnly(Side.CLIENT)
     public void renderTileEntityAt(TileEntity tileEntity, double x, double y, double z, float partialTicks) {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
@@ -359,4 +362,6 @@ public class Mobsnorender {
             renderer.renderTileEntityAt(tileEntity, x, y, z, partialTicks);
         }
     }
+
+     */
 }
