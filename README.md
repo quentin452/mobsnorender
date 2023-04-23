@@ -1,6 +1,6 @@
 # mobsnorender
 
-skip entity render of entities if they are higher or lower value in X Y Z in function of the player coords
+skip render of entities if they are out of range in X Y Z in function of the player coords to have more fps (configurable via config file)
 
 # motivation
 
@@ -32,4 +32,4 @@ fix tile entity renderer canceller doesn't work
 
 Add me on discord : I'm A Cat[FR]#7202
 
-Discord server : https://discord.gg/ZnmHKJzKkZ 
+Discord server : https://discord.gg/ZnmHKJzKkZ
